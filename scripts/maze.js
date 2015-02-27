@@ -3,7 +3,7 @@ var myFirebaseRef = new Firebase("https://resplendent-torch-4021.firebaseio.com/
 //Jason's section
 var maze = [ //1,1 === start 7 === finish 1 === wall 0 === open space
 [1,1,1,1,1,1,1,1,1,1],
-[1,0,1,0,1,1,1,1,1,1],
+[1,2,1,0,1,1,1,1,1,1],
 [1,0,1,0,0,0,0,0,0,1],
 [1,0,1,0,1,1,0,1,0,1],
 [1,0,1,0,0,0,0,1,0,1],
@@ -14,6 +14,15 @@ var maze = [ //1,1 === start 7 === finish 1 === wall 0 === open space
 [1,0,0,0,1,0,1,0,7,1],
 [1,1,1,1,1,1,1,1,1,1]
 ]
+
+var displayMaze = function() {
+  for (var i = 0; i < 11; i++) {
+    console.log(maze[i]);
+  }
+};
+
+displayMaze();
+
 
 var Player = function(row, column){
   this.x = row;
@@ -38,34 +47,46 @@ Player.prototype.checkMove = function(row, column){
 
 //the move function should add or subtract from the player's position
 Player.prototype.move = function(movement){
-  var dangMove = movement.toLowerCase();
+  if (movement !== undefined) {  
+      var dangMove = movement.toLowerCase();
+      var oldrow = this.x;
+      var oldcol = this.y;
 
-  if(dangMove === 'up'){
-    this.x--;
-    if(!this.checkMove(this.x, this.y)){
-      this.x++;
-    }
-  } else if (dangMove === 'down') {
-    this.x++;
-    if(!this.checkMove(this.x, this.y)){
-      this.x--;
-    }
-  } else if (dangMove === 'left') {
-    this.y--;
-    if(!this.checkMove(this.x, this.y)){
-      this.y++;
-    }
-  } else if (dangMove === 'right') {
-    this.y++;
-    if(!this.checkMove(this.x, this.y)){
-      this.x--;
-    }
-  } else {
-    console.log('Invalid command')
+      if(dangMove === 'up'){
+        this.x--;
+        if(!this.checkMove(this.x, this.y)){
+          this.x++;
+        }
+      } else if (dangMove === 'down') {
+        this.x++;
+        if(!this.checkMove(this.x, this.y)){
+          this.x--;
+        }
+      } else if (dangMove === 'left') {
+        this.y--;
+        if(!this.checkMove(this.x, this.y)){
+          this.y++;
+        }
+      } else if (dangMove === 'right') {
+        this.y++;
+        if(!this.checkMove(this.x, this.y)){
+          this.x--;
+        }
+      } else {
+        console.log('Invalid command')
+      }
+
+      updateMaze(oldrow, oldcol);
   }
 }
 
-var player = new Player(2,2);
+var updateMaze = function(oldrow, oldcol) {
+  maze[oldrow][oldcol] = 0;  
+  maze[player.x][player.y] = 2;
+  displayMaze();
+};
+
+var player = new Player(1,1);
 
 
 
@@ -104,9 +125,9 @@ myFirebaseRef.on('value', function(data) {
   if (data.val() !== null) {
     movesArray = data.val();
   }
-  console.log('proposed move: ' + movesArray[0]);
+  var proposedMove = movesArray[0];
   movesArray = movesArray.slice(1);
   console.log("updated movesArray: " + movesArray);
+  console.log('attempting to move player ' + proposedMove);
+  player.move(proposedMove);
 });
-
-
